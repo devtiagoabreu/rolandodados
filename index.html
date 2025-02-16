@@ -104,26 +104,8 @@
 <body>
     <div id="container">
         <h2>Rolador de Dados de RPG</h2>
-        <div class="form-group">
-            <label for="diceType">Tipo de Dado:</label>
-            <select id="diceType">
-                <option value="4">D4</option>
-                <option value="6">D6</option>
-                <option value="8">D8</option>
-                <option value="10">D10</option>
-                <option value="12">D12</option>
-                <option value="20">D20</option>
-                <option value="100">D100</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="diceCount">Quantidade de Dados:</label>
-            <input type="number" id="diceCount" min="1" value="1" />
-        </div>
-        <div class="form-group">
-            <label for="modifier">Modificador:</label>
-            <input type="number" id="modifier" value="0" />
-        </div>
+        <div id="diceList"></div>
+        <button id="addDice">Adicionar Dado</button>
         <button id="rollButton">Rolar Dados</button>
         <div class="dice-results" id="diceResults"></div>
         <p id="totalResult"></p>
@@ -138,38 +120,71 @@
             let total = 0;
             
             for (let i = 0; i < numDice; i++) {
-                let roll = Math.floor(Math.random() * diceType) + 1;
+                let roll = Math.floor(Math.random() * diceType) + 1 + modifier;
                 results.push(roll);
                 total += roll;
             }
             
-            total += modifier;
             return { rolls: results, total: total };
         }
 
+        function addDiceRow() {
+            const diceList = document.getElementById("diceList");
+            const div = document.createElement("div");
+            div.classList.add("form-group");
+            div.innerHTML = `
+                <label>Tipo de Dado:</label>
+                <select class="diceType">
+                    <option value="4">D4</option>
+                    <option value="6">D6</option>
+                    <option value="8">D8</option>
+                    <option value="10">D10</option>
+                    <option value="12">D12</option>
+                    <option value="20">D20</option>
+                    <option value="100">D100</option>
+                </select>
+                <label>Quantidade:</label>
+                <input type="number" class="diceCount" min="1" value="1" />
+                <label>Modificador:</label>
+                <input type="number" class="modifier" value="0" />
+            `;
+            diceList.appendChild(div);
+        }
+
+        document.getElementById("addDice").addEventListener("click", addDiceRow);
+
         document.getElementById("rollButton").addEventListener("click", () => {
-            const diceType = parseInt(document.getElementById("diceType").value);
-            const numDice = parseInt(document.getElementById("diceCount").value);
-            const modifier = parseInt(document.getElementById("modifier").value);
-            
-            const result = rollDice(numDice, diceType, modifier);
-            const resultsDiv = document.getElementById("diceResults");
-            resultsDiv.innerHTML = "";
-            
-            result.rolls.forEach(roll => {
-                let diceDiv = document.createElement("div");
-                diceDiv.classList.add("dice");
-                diceDiv.innerText = roll;
-                resultsDiv.appendChild(diceDiv);
+            const diceRows = document.querySelectorAll("#diceList .form-group");
+            let totalSum = 0;
+            let allRolls = [];
+            document.getElementById("diceResults").innerHTML = "";
+
+            diceRows.forEach(row => {
+                const diceType = parseInt(row.querySelector(".diceType").value);
+                const numDice = parseInt(row.querySelector(".diceCount").value);
+                const modifier = parseInt(row.querySelector(".modifier").value);
+                
+                const result = rollDice(numDice, diceType, modifier);
+                totalSum += result.total;
+                allRolls.push(`(${numDice}d${diceType} + ${modifier}) ➝ ${result.rolls.join(", ")}`);
+                
+                result.rolls.forEach(roll => {
+                    let diceDiv = document.createElement("div");
+                    diceDiv.classList.add("dice");
+                    diceDiv.innerText = roll;
+                    document.getElementById("diceResults").appendChild(diceDiv);
+                });
             });
+
+            document.getElementById("totalResult").innerText = `Total: ${totalSum}`;
             
-            document.getElementById("totalResult").innerText = `Total: ${result.total}`;
-            
-            let historyEntry = `Rolou ${numDice}d${diceType} + ${modifier}: ${result.rolls.join(", ")} (Total: ${result.total})`;
+            let historyEntry = allRolls.join(" | ") + ` (Total: ${totalSum})`;
             history.unshift(historyEntry);
             if (history.length > 10) history.pop();
             document.getElementById("history").innerHTML = `<strong>Histórico de Rolagens:</strong><br>${history.join('<br>')}`;
         });
+
+        addDiceRow();
     </script>
 </body>
 </html>
