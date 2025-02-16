@@ -94,3 +94,11 @@ button:hover {
   border-radius: 5px;
   border: 1px solid #d4af37;
 }
+
+.login__footer {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
+}
