@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolador de Dados de RPG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>Rolador de Dados de RPG</h2>
+        <input type="text" id="diceInput" placeholder="Ex: 2d6+3" />
+        <button id="rollButton">Rolar</button>
+        <pre id="result"></pre>
+    </div>
+
+    <script>
+        function rollDice(expression) {
+            const diceRegex = /(\d*)d(\d+)([+-]\d+)?/i;
+            const match = expression.match(diceRegex);
+            
+            if (!match) {
+                return "Formato inválido. Use algo como '2d6+3'";
+            }
+            
+            let [_, numDice, diceType, modifier] = match;
+            numDice = numDice ? parseInt(numDice) : 1;
+            diceType = parseInt(diceType);
+            modifier = modifier ? parseInt(modifier) : 0;
+            
+            if (numDice <= 0 || diceType <= 0) {
+                return "Número de dados e faces devem ser positivos.";
+            }
+            
+            let results = [];
+            let total = 0;
+            
+            for (let i = 0; i < numDice; i++) {
+                let roll = Math.floor(Math.random() * diceType) + 1;
+                results.push(roll);
+                total += roll;
+            }
+            
+            total += modifier;
+            return {
+                expression: expression,
+                rolls: results,
+                modifier: modifier,
+                total: total
+            };
+        }
+
+        document.getElementById("rollButton").addEventListener("click", () => {
+            const input = document.getElementById("diceInput").value;
+            const result = rollDice(input);
+            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+</html>
