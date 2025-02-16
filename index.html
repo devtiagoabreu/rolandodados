@@ -6,25 +6,56 @@
     <title>Rolador de Dados de RPG</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'MedievalSharp', cursive;
             text-align: center;
-            margin: 50px;
+            background: url('https://www.pixelstalk.net/wp-content/uploads/images6/Dark-Fantasy-Wallpaper-HD-Free-download.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+            padding: 0;
         }
         #container {
-            max-width: 400px;
-            margin: auto;
+            max-width: 90%;
+            width: 400px;
+            margin: 50px auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #d4af37;
             border-radius: 10px;
-            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        h2 {
+            color: #d4af37;
+            font-size: 24px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #d4af37;
         }
         select, input, button {
+            width: 100%;
             padding: 10px;
-            margin: 10px;
             font-size: 16px;
+            border: 2px solid #d4af37;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
         button {
+            background: #d4af37;
+            color: #000;
+            font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #b8860b;
         }
         .dice-results {
             display: flex;
@@ -36,32 +67,72 @@
             width: 50px;
             height: 50px;
             margin: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #d4af37;
+            color: #fff;
+        }
+        #history {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #d4af37;
+        }
+        @media (max-width: 500px) {
+            #container {
+                width: 90%;
+            }
+            .dice {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="container">
         <h2>Rolador de Dados de RPG</h2>
-        <label for="diceType">Tipo de Dado:</label>
-        <select id="diceType">
-            <option value="4">D4</option>
-            <option value="6">D6</option>
-            <option value="8">D8</option>
-            <option value="10">D10</option>
-            <option value="12">D12</option>
-            <option value="20">D20</option>
-            <option value="100">D100</option>
-        </select>
-        <label for="diceCount">Quantidade:</label>
-        <input type="number" id="diceCount" min="1" value="1" />
-        <label for="modifier">Modificador:</label>
-        <input type="number" id="modifier" value="0" />
-        <button id="rollButton">Rolar</button>
+        <div class="form-group">
+            <label for="diceType">Tipo de Dado:</label>
+            <select id="diceType">
+                <option value="4">D4</option>
+                <option value="6">D6</option>
+                <option value="8">D8</option>
+                <option value="10">D10</option>
+                <option value="12">D12</option>
+                <option value="20">D20</option>
+                <option value="100">D100</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="diceCount">Quantidade de Dados:</label>
+            <input type="number" id="diceCount" min="1" value="1" />
+        </div>
+        <div class="form-group">
+            <label for="modifier">Modificador:</label>
+            <input type="number" id="modifier" value="0" />
+        </div>
+        <button id="rollButton">Rolar Dados</button>
         <div class="dice-results" id="diceResults"></div>
         <p id="totalResult"></p>
+        <div id="history"><strong>Histórico de Rolagens:</strong><br></div>
     </div>
 
     <script>
+        let history = [];
+
         function rollDice(numDice, diceType, modifier) {
             let results = [];
             let total = 0;
@@ -86,14 +157,18 @@
             resultsDiv.innerHTML = "";
             
             result.rolls.forEach(roll => {
-                let img = document.createElement("img");
-                img.src = `https://via.placeholder.com/50?text=${roll}`;
-                img.alt = `Dado: ${roll}`;
-                img.classList.add("dice");
-                resultsDiv.appendChild(img);
+                let diceDiv = document.createElement("div");
+                diceDiv.classList.add("dice");
+                diceDiv.innerText = roll;
+                resultsDiv.appendChild(diceDiv);
             });
             
             document.getElementById("totalResult").innerText = `Total: ${result.total}`;
+            
+            let historyEntry = `Rolou ${numDice}d${diceType} + ${modifier}: ${result.rolls.join(", ")} (Total: ${result.total})`;
+            history.unshift(historyEntry);
+            if (history.length > 10) history.pop();
+            document.getElementById("history").innerHTML = `<strong>Histórico de Rolagens:</strong><br>${history.join('<br>')}`;
         });
     </script>
 </body>
