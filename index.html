@@ -18,7 +18,7 @@
             border-radius: 10px;
             box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
         }
-        input, button {
+        select, input, button {
             padding: 10px;
             margin: 10px;
             font-size: 16px;
@@ -26,40 +26,43 @@
         button {
             cursor: pointer;
         }
-        pre {
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: left;
+        .dice-results {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .dice {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
     <div id="container">
         <h2>Rolador de Dados de RPG</h2>
-        <input type="text" id="diceInput" placeholder="Ex: 2d6+3" />
+        <label for="diceType">Tipo de Dado:</label>
+        <select id="diceType">
+            <option value="4">D4</option>
+            <option value="6">D6</option>
+            <option value="8">D8</option>
+            <option value="10">D10</option>
+            <option value="12">D12</option>
+            <option value="20">D20</option>
+            <option value="100">D100</option>
+        </select>
+        <label for="diceCount">Quantidade:</label>
+        <input type="number" id="diceCount" min="1" value="1" />
+        <label for="modifier">Modificador:</label>
+        <input type="number" id="modifier" value="0" />
         <button id="rollButton">Rolar</button>
-        <pre id="result"></pre>
+        <div class="dice-results" id="diceResults"></div>
+        <p id="totalResult"></p>
     </div>
 
     <script>
-        function rollDice(expression) {
-            const diceRegex = /(\d*)d(\d+)([+-]\d+)?/i;
-            const match = expression.match(diceRegex);
-            
-            if (!match) {
-                return "Formato inválido. Use algo como '2d6+3'";
-            }
-            
-            let [_, numDice, diceType, modifier] = match;
-            numDice = numDice ? parseInt(numDice) : 1;
-            diceType = parseInt(diceType);
-            modifier = modifier ? parseInt(modifier) : 0;
-            
-            if (numDice <= 0 || diceType <= 0) {
-                return "Número de dados e faces devem ser positivos.";
-            }
-            
+        function rollDice(numDice, diceType, modifier) {
             let results = [];
             let total = 0;
             
@@ -70,18 +73,27 @@
             }
             
             total += modifier;
-            return {
-                expression: expression,
-                rolls: results,
-                modifier: modifier,
-                total: total
-            };
+            return { rolls: results, total: total };
         }
 
         document.getElementById("rollButton").addEventListener("click", () => {
-            const input = document.getElementById("diceInput").value;
-            const result = rollDice(input);
-            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+            const diceType = parseInt(document.getElementById("diceType").value);
+            const numDice = parseInt(document.getElementById("diceCount").value);
+            const modifier = parseInt(document.getElementById("modifier").value);
+            
+            const result = rollDice(numDice, diceType, modifier);
+            const resultsDiv = document.getElementById("diceResults");
+            resultsDiv.innerHTML = "";
+            
+            result.rolls.forEach(roll => {
+                let img = document.createElement("img");
+                img.src = `https://via.placeholder.com/50?text=${roll}`;
+                img.alt = `Dado: ${roll}`;
+                img.classList.add("dice");
+                resultsDiv.appendChild(img);
+            });
+            
+            document.getElementById("totalResult").innerText = `Total: ${result.total}`;
         });
     </script>
 </body>
